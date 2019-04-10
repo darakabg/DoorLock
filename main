@@ -1,0 +1,52 @@
+//Code by Daraka and team, @2019, Smart door locker
+#include <BlynkSimpleEsp8266.h>
+#include <ESP8266WebServer.h>
+#include <DNSServer.h>
+#include <ESP8266WiFi.h>
+#include <WiFiManager.h>  //Library - https://github.com/tzapu/WiFiManager 
+#include <Servo.h>
+#include <EEPROM.h>
+
+Servo myservo;
+char auth[] = "4aff3c568d9048b28bfb89bd62a33b5c";//Blynk token
+void setup(){
+  EEPROM.begin(512);
+  WiFiManager wifiManager;
+  Serial.begin(9600);
+  myservo.attach(40);
+  //wifiManager.autoConnect("AP-NAME", "AP-PASSWORD");
+  wifiManager.autoConnect("NodeMCU");
+  pinMode(LED_BUILTIN, OUTPUT);
+  Blynk.begin(auth, WiFi.SSID().c_str(), WiFi.psk().c_str());
+  Serial.println("connected...:)");
+
+  
+}
+
+BLYNK_WRITE(V2)
+{
+  int pinValue = param.asInt(); 
+  Serial.print("V1 Slider value is: ");
+  Serial.println(pinValue);
+  Blynk.virtualWrite(V0, "Door State");
+  if(pinValue)
+  {
+    Blynk.virtualWrite(V1, "Open");
+    servo();
+    
+  }else 
+  {
+    Blynk.virtualWrite(V1, "Closed");
+    myservo.write(180);
+  }
+  
+}
+void loop(){
+  Blynk.run();
+  
+}
+
+void servo(){
+  myservo.write(90);
+  
+}
